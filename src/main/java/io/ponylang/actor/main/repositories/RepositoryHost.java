@@ -12,6 +12,9 @@ public interface RepositoryHost
     CorralDescriptor loadCorralDescriptor( Repository repository, String version )
         throws IOException;
 
+    String loadLicense( Repository repository, String version )
+            throws IOException;
+
     class DummyHost
         implements RepositoryHost
     {

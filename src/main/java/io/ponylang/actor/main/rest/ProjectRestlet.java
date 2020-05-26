@@ -1,7 +1,6 @@
 package io.ponylang.actor.main.rest;
 
 import io.ponylang.actor.main.elastic.ElasticSearchClient;
-import io.ponylang.actor.main.project.ProjectDescriptor;
 import io.ponylang.actor.main.project.ProjectLoader;
 import io.ponylang.actor.main.repositories.RepositoryScan;
 import org.restlet.Request;
@@ -48,10 +47,17 @@ public class ProjectRestlet extends Restlet
             Form form = new Form();
             FormUtils.parse( form, request.getEntity(), true );
             locator = getValueOfForm( form, "locator" );
-            version = getValueOfForm( form, "version" );
-            String projectJson = elastic.findProjectByIdentity( locator, version );
-            response.setEntity( projectJson, MediaType.APPLICATION_JSON );
-            response.setStatus( Status.SUCCESS_OK );
+            if( locator != null )
+            {
+                version = getValueOfForm( form, "version" );
+                String projectJson = elastic.findProjectByIdentity( locator, version );
+                response.setEntity( projectJson, MediaType.APPLICATION_JSON );
+                response.setStatus( Status.SUCCESS_OK );
+            }
+            else
+            {
+                response.setStatus( Status.CLIENT_ERROR_BAD_REQUEST, "Must provide 'locator' and optionally a 'version' in the form." );
+            }
         }
         catch( Exception e )
         {

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <title>Pony Hub</title>
+  <link href="css/bootstrap-4.4.0.min.css" rel="stylesheet">
+  <link href="css/dashboard.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/fontawesome-all.css" />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    footer {
+      position: absolute;
+      color: #e2e6ea;
+      background-color: #1d2124;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body onload="init()">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#"><img alt="pony logo" width="64" height="50" src="images/Main-galloping.svg" class="d-inline-block align-top"/>&nbsp;&nbsp;&nbsp;Pony Hub</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link active" href="#">Search <span class="sr-only">(current)</span></a>
+      <a class="nav-item nav-link" href="#">Add Project</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid" style="height:100%">
+  <div class="row" style="height:100%;">
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <form>
+          <div class="form-row align-items-center">
+            <div class="col-auto">
+              <label class="sr-only" for="searchTerm">Free Text Search</label>
+              <input size="70" type="text" class="form-control mb-2" id="searchTerm" placeholder="Free text, tags and/or keywords...">
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary mb-2">Search</button>
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary mb-2">Advanced</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script type="text/javascript" src="js/jquery-3.4.1.slim.min.js"></script>
+<script>window.jQuery || document.write('<script type="text/javascript" src="js/jquery-3.4.1.slim.min.js"><\/script>')</script>
+<script type="text/javascript" src="js/bootstrap-4.4.0.bundle.min.js"></script>
+<script type="text/javascript" src="js/vue-2.6.10.min.js"></script>
+<script type="text/javascript" src="index.js"></script>
+</body>
+</html>

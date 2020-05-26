@@ -134,6 +134,18 @@ public class GitHub
         return loadBlob( repository, version, "README.md" );
     }
 
+    @Override
+    public String loadLicense( Repository repository, String version )
+        throws IOException
+    {
+        String license = loadBlob( repository, version, "LICENSE.txt" );
+        if( license == null )
+            license = loadBlob( repository, version, "LICENSE.md" );
+        if( license == null )
+            license = loadBlob( repository, version, "LICENSE" );
+        return license;
+    }
+
     public String loadBlob( Repository repository, String version, String... path )
         throws IOException
     {
