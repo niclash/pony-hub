@@ -31,5 +31,12 @@ public interface RepositoryHost
         {
             return null;
         }
+
+        @Override
+        public String loadLicense( Repository repository, String version )
+            throws IOException
+        {
+            return null;
+        }
     }
 }
