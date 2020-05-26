@@ -1,0 +1,111 @@
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:8.3.0'
+        classpath 'com.netflix.nebula:nebula-release-plugin:15.0.1'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'war'
+    id 'application'
+}
+apply plugin: 'nebula.release'
+apply plugin: 'java-library'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+java {
+    targetCompatibility(JavaVersion.VERSION_11)
+    sourceCompatibility(JavaVersion.VERSION_11)
+}
+compileJava.options.encoding = 'UTF-8'
+
+group 'io.ponylang'
+version '1.0-SNAPSHOT'
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { name 'restlet-repo'; url 'https://maven.restlet.talend.com' }
+}
+
+def restlet_version = '2.4.3'
+
+dependencies {
+    compile "org.apache.johnzon:johnzon-core:1.2.5"
+    compile "org.apache.johnzon:johnzon-mapper:1.2.5"
+    compile "javax.json:javax.json-api:1.1.4"
+    compile "org.restlet.jee:org.restlet:$restlet_version"
+    compile "org.restlet.jee:org.restlet.ext.servlet:$restlet_version"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+apply plugin: 'application'
+apply plugin: 'nebula.release'
+apply plugin: 'nebula.deb'
+apply plugin: 'nebula.ospackage'
+apply plugin: 'nebula.ospackage-base'
+apply plugin: 'nebula.ospackage-daemon'
+apply plugin: 'nebula.ospackage-application'
+
+
+if( tasks.findByName("distZip")){
+    rootProject.tasks.release.dependsOn tasks.distZip
+}
+
+tasks.release.dependsOn tasks.assemble
+mainClassName = 'io.ponylang.actor.main.Main'
+
+ospackage_application {
+    prefix = '/usr/local/lib/pony/'
+}
+
+ospackage {
+    user = "ponyactor"
+    postInstall file('src/main/scripts/post-install.sh')
+    preUninstall file('src/main/scripts/pre-uninstall.sh')
+    into '/usr/local/lib/pony/' + project.name
+
+    from('bin') {
+        fileType = CONFIG | NOREPLACE
+        into 'bin'
+    }
+
+    from('src/main/dist/resources') {
+        into '/usr/local/lib/pony/' + project.name + "/resources"
+    }
+
+    from(jar.outputs.files) {
+        into '/usr/local/lib/pony/' + project.name + '/lib'
+    }
+
+    from('src/main/conf') {
+        fileType = CONFIG | NOREPLACE
+        include "*/**"
+        exclude "*backup*"
+        into '/etc/pony/' + project.name + '/'
+    }
+
+    from('src/main/webapp') {
+        fileType = CONFIG | NOREPLACE
+        into '/var/www/pony/' + project.name + '/'
+    }
+}
+
+task packDeb(type: Deb) {
+}
+
+buildDeb {
+    requires("openjdk-11-jre-headless")
+    link('/etc/systemd/system/' + project.name + '.service', '/usr/local/lib/pony/' + project.name + '/bin/' + project.name + '.service')
+}
+
+assemble.dependsOn buildDeb

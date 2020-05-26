@@ -1,0 +1,12 @@
+[Unit]
+Description=Pony Main Actor, a search facility for Pony Language developers.
+
+[Service]
+User=ponyactor
+Group=nogroup
+EnvironmentFile=-/etc/default/ponyactor
+ExecStart=/usr/local/lib/pony/ponyactor/bin/ponyactor
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
