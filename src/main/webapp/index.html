@@ -39,8 +39,7 @@
     </div>
   </div>
 </nav>
-<div class="container-fluid" style="height:100%">
-  <div class="float-left" layout="column">
+<div class="container-fluid">
     <section layout="row" flex="">
       <div class="row">
         <div class="col-sm-3">
@@ -59,7 +58,7 @@
               <h4 class="card-title">Recent Updates</h4>
               <p class="card-text">
               <div ng-repeat="u in updates">
-              <li><a href="#!/view_project/{{u.host + '/' + u.organization + '/' + u.name + '/' + u.version}}"> {{u.host === "gh" ? "github" : u.host}}//:{{u.organization}}/{{u.name}}/{{u.version}}</a></li>
+              <li><a href="#!/view_project/{{u.host + '/' + u.organization + '/' + u.name + '/' + u.version}}"> {{u.host === "gh" ? "github" : u.host}}://{{u.organization}}/{{u.name}}/{{u.version}}</a></li>
               </div>
               </p>
             </div>
@@ -68,7 +67,6 @@
         <div ng-view class="col-sm-9"></div>
       </div>
     </section>
-  </div>
 
 </div>
 
