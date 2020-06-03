@@ -145,19 +145,11 @@ public class ElasticSearchClient
     {
         String query = String.format( QUERY_WITH_LUCENE, escapeQuotes( luceneFormat ) );
         String url = "http://[::1]:9200/" + INDEX_VERSIONED_STATE + "/_search";
-        try
-        {
-            ClientResource request = newClientResource( url );
-            Representation representation = request.post( new StringRepresentation( query, MediaType.APPLICATION_JSON ) );
-            JacksonRepresentation<SearchResult> rep = new JacksonRepresentation<>( representation, SearchResult.class );
-            rep.setObjectMapper( mapper );
-            return rep.getObject();
-        }
-        catch( ResourceException e )
-        {
-            String msg = "Unable to retrieve " + url + ". Error " + e.getStatus();
-            throw new IOException( msg, e );
-        }
+        ClientResource request = newClientResource( url );
+        Representation representation = request.post( new StringRepresentation( query, MediaType.APPLICATION_JSON ) );
+        JacksonRepresentation<SearchResult> rep = new JacksonRepresentation<>( representation, SearchResult.class );
+        rep.setObjectMapper( mapper );
+        return rep.getObject();
     }
 
     private String escapeQuotes( String text )

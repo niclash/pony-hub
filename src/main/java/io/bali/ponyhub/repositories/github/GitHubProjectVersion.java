@@ -11,18 +11,17 @@ import static io.bali.ponyhub.repositories.IdentityResolver.escape;
 public class GitHubProjectVersion
     implements ProjectVersion
 {
-    private GitHubRepository repository;
-    private GitHubTag version;
-    private CorralDescriptor descriptor;
-    private BundleJson bundleJson;
-    private String readMe;
-    private String license;
+    public GitHubRepository repository;
+    public GitHubTag version;
+    public CorralDescriptor descriptor;
+    public BundleJson bundleJson;
+    public String readMe;
 
     public GitHubProjectVersion()
     {
     }
 
-    public GitHubProjectVersion( Repository repository, RepositoryVersion version, CorralDescriptor descriptor, BundleJson bundleJson, String readMe, String license )
+    public GitHubProjectVersion( Repository repository, RepositoryVersion version, CorralDescriptor descriptor, BundleJson bundleJson, String readMe )
     {
         this.repository = (GitHubRepository) repository;
         if( version.getName().equals( repository.getDefaultBranch() ) )
@@ -36,79 +35,18 @@ public class GitHubProjectVersion
         this.descriptor = descriptor;
         this.bundleJson = bundleJson;
         this.readMe = readMe;
-        this.license = license;
-    }
-
-    public Repository getRepository()
-    {
-        return repository;
-    }
-
-    public void setRepository( GitHubRepository repository )
-    {
-        this.repository = repository;
-    }
-
-    public RepositoryVersion getVersion()
-    {
-        return version;
-    }
-
-    public void setVersion( GitHubTag version )
-    {
-        this.version = version;
-    }
-
-    public CorralDescriptor getDescriptor()
-    {
-        return descriptor;
-    }
-
-    public void setDescriptor( CorralDescriptor descriptor )
-    {
-        this.descriptor = descriptor;
-    }
-
-    public BundleJson getBundleJson()
-    {
-        return bundleJson;
-    }
-
-    public void setBundleJson( BundleJson bundleJson )
-    {
-        this.bundleJson = bundleJson;
-    }
-
-    public String getReadMe()
-    {
-        return readMe;
-    }
-
-    public void setReadMe( String readMe )
-    {
-        this.readMe = readMe;
-    }
-
-    public String getLicense()
-    {
-        return license;
-    }
-
-    public void setLicense( String license )
-    {
-        this.license = license;
     }
 
     @Override
     public String organization()
     {
-        return repository.getOwner().getLogin();
+        return repository.getOwner().login;
     }
 
     @Override
     public String name()
     {
-        return repository.getName();
+        return repository.name;
     }
 
     @Override
@@ -127,8 +65,8 @@ public class GitHubProjectVersion
     public String identity()
     {
         return escape( repository.host().identity() ) + "_"
-               + escape( repository.getOwner().getLogin() ) + "_"
-               + escape( repository.getName() ) + "_"
+               + escape( repository.getOwner().login ) + "_"
+               + escape( repository.name ) + "_"
                + escape( version() );
     }
 }

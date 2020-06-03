@@ -4,9 +4,10 @@
     <div class="col-sm-12">
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title">Description</h4>
-          <hr/>
-          <pre><code>{{projectData._source.repository.description}}</code></pre>
+          <h4 class="card-title">Overview</h4>
+          Owner: {{projectData._source.repository.owner.login}}&nbsp;&nbsp;<img width="32px" height="32px" src="{{projectData._source.repository.owner.avatar_url}}"/><br/>
+          License: <a href="{{projectData._source.repository.license.url}}">{{projectData._source.repository.license.name}}</a><br/>
+          Description:<pre><code>{{projectData._source.repository.description}}</code></pre>
         </div>
       </div>
     </div>
@@ -18,17 +19,6 @@
           <h4 class="card-title">README</h4>
           <hr/>
           <pre><code>{{projectData._source.readMe}}</code></pre>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="card">
-        <div class="card-body">
-          <h4 class="card-title">License</h4>
-          <hr/>
-          <pre><code>{{projectData._source.license}}</code></pre>
         </div>
       </div>
     </div>

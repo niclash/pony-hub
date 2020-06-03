@@ -5,11 +5,11 @@ import io.bali.ponyhub.repositories.RepositoryVersion;
 public class GitHubTag
     implements RepositoryVersion
 {
-    private String name;
-    private String nodeId;
-    private String zipBallUrl;
-    private String tarBallUrl;
-    private GitHubCommit commits;
+    public String name;
+    public String node_id;
+    public String zipball_url;
+    public String tarball_url;
+    public GitHubCommit commit;
 
     public String getName()
     {
@@ -19,46 +19,6 @@ public class GitHubTag
     public void setName( String name )
     {
         this.name = name;
-    }
-
-    public String getNodeId()
-    {
-        return nodeId;
-    }
-
-    public void setNodeId( String nodeId )
-    {
-        this.nodeId = nodeId;
-    }
-
-    public String getZipBallUrl()
-    {
-        return zipBallUrl;
-    }
-
-    public void setZipBallUrl( String zipBallUrl )
-    {
-        this.zipBallUrl = zipBallUrl;
-    }
-
-    public String getTarBallUrl()
-    {
-        return tarBallUrl;
-    }
-
-    public void setTarBallUrl( String tarBallUrl )
-    {
-        this.tarBallUrl = tarBallUrl;
-    }
-
-    public GitHubCommit getCommits()
-    {
-        return commits;
-    }
-
-    public void setCommits( GitHubCommit commits )
-    {
-        this.commits = commits;
     }
 
     @Override

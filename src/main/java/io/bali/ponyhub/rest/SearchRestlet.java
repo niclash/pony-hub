@@ -14,6 +14,7 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Method;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
+import org.restlet.resource.ResourceException;
 
 public class SearchRestlet extends Restlet
 {
@@ -61,7 +62,7 @@ public class SearchRestlet extends Restlet
     }
 
     private void doPost( Request request, Response response )
-        throws IOException
+        throws IOException, ResourceException
     {
         String body = request.getEntityAsText();
         if( body.startsWith( "free:" ) )

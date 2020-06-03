@@ -80,7 +80,7 @@ public class ProjectRestlet extends Restlet
 
     private void queueRepositoryScan( String locator )
     {
-        new RepositoryScan( IdentityResolver.parse( locator ), elastic, true );
+        RepositoryScan.scanRepository( IdentityResolver.parse( locator ), elastic, true );
     }
 
     private String getValueOfForm( Form form, String key )

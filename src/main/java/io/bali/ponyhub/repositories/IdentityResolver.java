@@ -34,13 +34,21 @@ public class IdentityResolver
 
     public static RepositoryIdentity parseBundleJsonRef( String type, String repo )
     {
-        if( type.equals( "github" ) )
+        try
         {
-            String[] parts = repo.split( "/" );
-            String owner = parts[ 0 ];
-            String name = parts[ 1 ];
-            return new RepositoryIdentity( GitHub.INSTANCE.identity(), owner, name );
+            if( type.equals( "github" ) )
+            {
+                String[] parts = repo.split( "/" );
+                String owner = parts[ 0 ];
+                String name = parts[ 1 ];
+                return new RepositoryIdentity( GitHub.INSTANCE.identity(), owner, name );
+            }
+            return null;
         }
-        return null;
+        catch( Exception e )
+        {
+            String msg = "Unable to parse bundle.json : " + type + " => " + repo;
+            throw new IllegalArgumentException(msg, e);
+        }
     }
 }

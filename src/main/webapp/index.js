@@ -27,8 +27,8 @@ angular.module('ponyhubapp', ['ngRoute', 'ngMessages', 'ponyhub.search', 'ponyhu
                         $log.info("search", resp);
                         callback(resp.data, true);
                     },
-                    function (response) {
-                        $log.error("Error received from server.", response);
+                    function (resp) {
+                        $log.error("Error received from server.", resp);
                         callback(resp, false);
                     }
                 )

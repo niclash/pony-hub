@@ -18,6 +18,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.restlet.Response;
 import org.restlet.data.ChallengeResponse;
@@ -60,23 +61,21 @@ public class GitHub
     }
 
     @Override
-    public ProjectVersion newProjectVersion( Repository repository, RepositoryVersion version, CorralDescriptor descriptor, BundleJson bundleJson, String readMe, String license )
+    public ProjectVersion newProjectVersion( Repository repository, RepositoryVersion version, CorralDescriptor descriptor, BundleJson bundleJson, String readMe )
     {
-        return new GitHubProjectVersion( repository, version, descriptor, bundleJson, readMe, license );
+        return new GitHubProjectVersion( repository, version, descriptor, bundleJson, readMe );
     }
 
     public GitHubOrganization loadOrganization( String orgName )
         throws IOException
     {
-        String template = api.getOrganizationUrl();
-        return load( template, GitHubOrganization.class, singletonMap( "org", orgName ), emptyMap() );
+        return load( api.organization_url, GitHubOrganization.class, singletonMap( "org", orgName ), emptyMap() );
     }
 
     private GitHubRepository loadRepository( String owner, String name )
         throws IOException
     {
-        String template = api.getRepositoryUrl();
-        return load( template, GitHubRepository.class, args( "owner", owner, "repo", name ), emptyMap() );
+        return load( api.repository_url, GitHubRepository.class, args( "owner", owner, "repo", name ), emptyMap() );
     }
 
     private Map<String, String> args( String... parts )
@@ -113,8 +112,9 @@ public class GitHub
         String remainingLimit = headers.getFirstValue( "X-RateLimit-Remaining" );
         String resetLimit = headers.getFirstValue( "X-RateLimit-Reset" );
         StatisticsUtil.reportGithubAccess( maxLimit, remainingLimit, resetLimit );
-        // We had this before, how?
-        return mapper.readValue( representation.getStream(), resultType );
+        String json = representation.getText();
+        System.out.println(json);
+        return mapper.readValue( json, resultType );
     }
 
     @Override
@@ -138,22 +138,6 @@ public class GitHub
     }
 
     @Override
-    public String loadLicense( Repository repository, RepositoryVersion version )
-        throws IOException
-    {
-        String license = loadBlob( repository, version.getName(), "LICENSE.txt" );
-        if( license == null )
-        {
-            license = loadBlob( repository, version.getName(), "LICENSE.md" );
-        }
-        if( license == null )
-        {
-            license = loadBlob( repository, version.getName(), "LICENSE" );
-        }
-        return license;
-    }
-
-    @Override
     public Repository fetchRepository( RepositoryIdentity identity )
         throws IOException
     {
@@ -166,13 +150,13 @@ public class GitHub
     public List<RepositoryVersion> loadVersions( Repository repo )
         throws IOException
     {
-        String template = ( (GitHubRepository) repo ).getTagsUrl();
+        String template = ( (GitHubRepository) repo ).tags_url;
         GitHubTag[] tags = load( template, GitHubTag[].class, emptyMap(), emptyMap() );
         List<RepositoryVersion> versionTags = Arrays.stream( tags )
                                                     .filter( v -> v.getName().matches( "[0-9]+(\\.[0-9]+)*" ) )
                                                     .collect( Collectors.toList() );
         String defaultBranch = repo.getDefaultBranch();
-        versionTags.add( () -> defaultBranch );
+        versionTags.add( new NominalRepositoryVersion( defaultBranch ) );
         return versionTags;
     }
 
@@ -203,22 +187,22 @@ public class GitHub
             version = repository.getDefaultBranch();
         }
         GitHubRepository repo = (GitHubRepository) repository;
-        String template = repo.getTreesUrl();
+        String template = repo.trees_url;
         GitHubTree tree = load( template, GitHubTree.class, emptyMap(), singletonMap( "sha", version ) );
         for( String p : path )
         {
-            for( GitHubTree.Node node : tree.getTree() )
+            for( GitHubTree.Node node : tree.tree )
             {
-                if( node.getPath().equals( p ) )
+                if( node.path.equals( p ) )
                 {
-                    if( node.getType().equals( "tree" ) )
+                    if( node.type.equals( "tree" ) )
                     {
-                        tree = load( node.getUrl(), GitHubTree.class, emptyMap(), emptyMap() );
+                        tree = load( node.url, GitHubTree.class, emptyMap(), emptyMap() );
                         break;
                     }
-                    if( node.getType().equals( "blob" ) )
+                    if( node.type.equals( "blob" ) )
                     {
-                        GitHubBlob blob = load( node.getUrl(), GitHubBlob.class, emptyMap(), emptyMap() );
+                        GitHubBlob blob = load( node.url, GitHubBlob.class, emptyMap(), emptyMap() );
                         return decode( blob );
                     }
                 }
@@ -230,10 +214,10 @@ public class GitHub
     private String decode( GitHubBlob blob )
         throws IOException
     {
-        String encoding = blob.getEncoding();
+        String encoding = blob.encoding;
         if( encoding.equals( "base64" ) )
         {
-            String base64Content = blob.getContent().replace( "\n", "" ).replace( "\\n", "" );
+            String base64Content = blob.content.replace( "\n", "" ).replace( "\\n", "" );
             byte[] decode = Base64.getDecoder().decode( base64Content );
             return new String( decode );
         }
@@ -291,6 +275,30 @@ public class GitHub
         catch( InterruptedException e )
         {
             // ignore
+        }
+    }
+
+    private static class NominalRepositoryVersion implements RepositoryVersion
+    {
+        private final String defaultBranch;
+
+        public NominalRepositoryVersion( String defaultBranch )
+        {
+            this.defaultBranch = defaultBranch;
+        }
+
+        @Override
+        public String getName()
+        {
+            return defaultBranch;
+        }
+
+        @Override
+        public String toString()
+        {
+            return new StringJoiner( ", ", NominalRepositoryVersion.class.getSimpleName() + "[", "]" )
+                .add( "defaultBranch='" + defaultBranch + "'" )
+                .toString();
         }
     }
 }
