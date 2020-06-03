@@ -1,8 +1,10 @@
 package io.ponylang.actor.main.repositories.github;
 
+import io.ponylang.actor.main.repositories.Owner;
 import org.apache.johnzon.mapper.JohnzonProperty;
 
 public class GitHubOwner
+    implements Owner
 {
     private String login;
     private long id;
@@ -231,5 +233,11 @@ public class GitHubOwner
     public void setSiteAdmin( boolean siteAdmin )
     {
         this.siteAdmin = siteAdmin;
+    }
+
+    @Override
+    public String identity()
+    {
+        return getLogin();
     }
 }

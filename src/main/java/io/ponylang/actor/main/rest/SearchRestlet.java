@@ -1,12 +1,11 @@
 package io.ponylang.actor.main.rest;
 
 import io.ponylang.actor.main.elastic.ElasticSearchClient;
-import io.ponylang.actor.main.project.ProjectDescriptor;
 import java.io.IOException;
-import java.util.List;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.Restlet;
+import org.restlet.data.MediaType;
 import org.restlet.data.Method;
 import org.restlet.data.Status;
 
@@ -59,8 +58,10 @@ public class SearchRestlet extends Restlet
         throws IOException
     {
         String body = request.getEntityAsText();
-        String result = elastic.search( null, body );
-
+        String result = elastic.search( "repository", body );
+        System.out.println("Query:\t" + body + "\n\t" + result);
+        response.setEntity( result, MediaType.APPLICATION_JSON );
+        response.setStatus( Status.SUCCESS_OK );
     }
 }
 

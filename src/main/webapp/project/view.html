@@ -1,0 +1,36 @@
+<div>
+  <h4><a href="{{'https://' + (host==='gh'?'github.com':host ) + '/'+ organization + '/' + name}}" target="_blank">{{(host==='gh'?'github.com://':host + '://') + organization + '/' + name + '/' + version}}</a></h4>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Description</h4>
+          <hr/>
+          <pre><code>{{projectData._source.repository.description}}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">README</h4>
+          <hr/>
+          <pre><code>{{projectData._source.readMe}}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">License</h4>
+          <hr/>
+          <pre><code>{{projectData._source.license}}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

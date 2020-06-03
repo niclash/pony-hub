@@ -1,42 +1,29 @@
 package io.ponylang.actor.main.repositories;
 
-import io.ponylang.actor.main.project.CorralDescriptor;
 import java.io.IOException;
+import java.util.List;
 
 public interface RepositoryHost
 {
-
-    String loadReadMe( Repository repository, String version )
+    String loadReadMe( Repository repository, RepositoryVersion version )
         throws IOException;
 
-    CorralDescriptor loadCorralDescriptor( Repository repository, String version )
+    CorralDescriptor loadCorralDescriptor( Repository repository, RepositoryVersion version )
         throws IOException;
 
-    String loadLicense( Repository repository, String version )
+    String loadLicense( Repository repository, RepositoryVersion version )
             throws IOException;
 
-    class DummyHost
-        implements RepositoryHost
-    {
-        @Override
-        public String loadReadMe( Repository repository, String version )
-            throws IOException
-        {
-            return null;
-        }
+    Repository fetchRepository( RepositoryIdentity repoId )
+        throws IOException;
 
-        @Override
-        public CorralDescriptor loadCorralDescriptor( Repository repository, String version )
-            throws IOException
-        {
-            return null;
-        }
+    List<RepositoryVersion> loadVersions( Repository repo )
+        throws IOException;
 
-        @Override
-        public String loadLicense( Repository repository, String version )
-            throws IOException
-        {
-            return null;
-        }
-    }
+    ProjectVersion newProjectVersion( Repository repository, RepositoryVersion version, CorralDescriptor descriptor, BundleJson bundleJson, String readMe, String license );
+
+    BundleJson loadLegacyDeps( Repository repository, RepositoryVersion version )
+        throws IOException;
+
+    String identity();
 }

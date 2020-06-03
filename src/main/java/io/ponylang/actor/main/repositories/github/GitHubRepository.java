@@ -1,10 +1,13 @@
 package io.ponylang.actor.main.repositories.github;
 
 import io.ponylang.actor.main.repositories.Repository;
+import io.ponylang.actor.main.repositories.RepositoryHost;
+import io.ponylang.actor.main.repositories.RepositoryIdentity;
 import java.time.ZonedDateTime;
 import org.apache.johnzon.mapper.JohnzonProperty;
 
 public class GitHubRepository
+    implements Repository
 {
     private long id;
 
@@ -272,6 +275,12 @@ public class GitHubRepository
     public void setHtmlUrl( String htmlUrl )
     {
         this.htmlUrl = htmlUrl;
+    }
+
+    @Override
+    public RepositoryIdentity identity()
+    {
+        return new RepositoryIdentity( host().identity(), owner.getLogin(), name );
     }
 
     public String getDescription()
@@ -934,6 +943,12 @@ public class GitHubRepository
         this.defaultBranch = defaultBranch;
     }
 
+    @Override
+    public RepositoryHost host()
+    {
+        return GitHub.INSTANCE;
+    }
+
     public String getTempCloneToken()
     {
         return tempCloneToken;
@@ -962,5 +977,21 @@ public class GitHubRepository
     public void setSubscribersCount( int subscribersCount )
     {
         this.subscribersCount = subscribersCount;
+    }
+
+    public GitHubOwner getOwner()
+    {
+        return owner;
+    }
+
+    public void setOwner( GitHubOwner owner )
+    {
+        this.owner = owner;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "github://" + owner.getLogin() + "/" + name;
     }
 }

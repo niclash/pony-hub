@@ -1,28 +1,28 @@
 package io.ponylang.actor.main.repositories;
 
+import io.ponylang.actor.main.StatisticsUtil;
 import io.ponylang.actor.main.elastic.ElasticSearchClient;
-import io.ponylang.actor.main.project.CorralDescriptor;
-import io.ponylang.actor.main.project.ProjectDescriptor;
-import io.ponylang.actor.main.project.ProjectLoader;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static java.time.temporal.ChronoUnit.MILLIS;
 
 public class RepositoryScan
     implements Runnable
 {
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private final String locator;
-    private final String version;
+    private final RepositoryIdentity repoId;
     private final ElasticSearchClient elastic;
-    private final ProjectLoader projectLoader;
+    private final boolean force;
 
-    public RepositoryScan( String locator, String version, ElasticSearchClient elastic, ProjectLoader projectLoader )
+    public RepositoryScan( RepositoryIdentity repoId, ElasticSearchClient elastic, boolean force )
     {
-        this.locator = locator;
-        this.version = version;
+        this.repoId = repoId;
         this.elastic = elastic;
-        this.projectLoader = projectLoader;
+        this.force = force;
         executor.submit( this );
     }
 
@@ -31,27 +31,17 @@ public class RepositoryScan
     {
         try
         {
-            Repository repository = Repository.parse( locator );
-            if( repository == null )
+            RepositoryHost repositoryHost = IdentityResolver.hostOf( repoId );
+            if( repositoryHost != null )
             {
-                return;
-            }
-            elastic.store( repository );
-            if( !elastic.recentVersionExists( repository, version ) )
-            {
-                RepositoryHost host = repository.host();
-                CorralDescriptor descriptor = host.loadCorralDescriptor( repository, version );
-                if( descriptor == null )
+                Repository repo = repositoryHost.fetchRepository( repoId );
+                if( repo != null )
                 {
-                    return;
-                }
-                descriptor.setRepository( repository );
-                ProjectDescriptor meta = projectLoader.load( descriptor );
-                elastic.store( meta );
-                for( CorralDescriptor.Dependency dep : descriptor.getDeps() )
-                {
-                    // queue each dependency.
-                    new RepositoryScan( dep.getLocator(), dep.getVersion(), elastic, projectLoader );
+                    elastic.store( repo );
+                    List<RepositoryVersion> versions = repo.host().loadVersions( repo );
+                    versions.forEach( v -> {
+                        new VersionFetch( repo, v, elastic, force );
+                    } );
                 }
             }
         }
@@ -60,4 +50,5 @@ public class RepositoryScan
             e.printStackTrace();
         }
     }
+
 }

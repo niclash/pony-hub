@@ -1,43 +1,50 @@
 package io.ponylang.actor.main.repositories.github;
 
+import io.ponylang.actor.main.StatisticsUtil;
 import io.ponylang.actor.main.ZonedDateTimeConverter;
-import io.ponylang.actor.main.project.CorralDescriptor;
+import io.ponylang.actor.main.repositories.BundleJson;
+import io.ponylang.actor.main.repositories.CorralDescriptor;
+import io.ponylang.actor.main.repositories.ProjectVersion;
 import io.ponylang.actor.main.repositories.Repository;
 import io.ponylang.actor.main.repositories.RepositoryHost;
+import io.ponylang.actor.main.repositories.RepositoryIdentity;
+import io.ponylang.actor.main.repositories.RepositoryVersion;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.stream.Collectors;
 import org.apache.johnzon.mapper.Mapper;
 import org.apache.johnzon.mapper.MapperBuilder;
 import org.apache.johnzon.mapper.internal.ConverterAdapter;
+import org.restlet.Response;
+import org.restlet.data.ChallengeResponse;
+import org.restlet.data.ChallengeScheme;
+import org.restlet.data.Header;
+import org.restlet.data.Language;
+import org.restlet.data.MediaType;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
+import org.restlet.util.Series;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
 public class GitHub
     implements RepositoryHost
 {
-    private static final HttpClient client = HttpClient.newBuilder()
-                                                       .followRedirects( HttpClient.Redirect.NORMAL )
-                                                       .connectTimeout( Duration.ofSeconds( 20 ) )
-                                                       .build();
+    public static final RepositoryHost INSTANCE = new GitHub();
+
     private GitHubApi api;
     private String token;
     private final Mapper mapper;
 
-    public GitHub()
+    private GitHub()
     {
         mapper = new MapperBuilder().addAdapter( ZonedDateTime.class, String.class, new ConverterAdapter<>( new ZonedDateTimeConverter() ) ).build();
         try
@@ -53,6 +60,12 @@ public class GitHub
         }
     }
 
+    @Override
+    public ProjectVersion newProjectVersion( Repository repository, RepositoryVersion version, CorralDescriptor descriptor, BundleJson bundleJson, String readMe, String license )
+    {
+        return new GitHubProjectVersion( repository, version, descriptor, bundleJson, readMe, license );
+    }
+
     public GitHubOrganization loadOrganization( String orgName )
         throws IOException
     {
@@ -60,7 +73,7 @@ public class GitHub
         return load( template, GitHubOrganization.class, singletonMap( "org", orgName ), emptyMap() );
     }
 
-    public GitHubRepository loadRepository( String owner, String name )
+    private GitHubRepository loadRepository( String owner, String name )
         throws IOException
     {
         String template = api.getRepositoryUrl();
@@ -84,66 +97,103 @@ public class GitHub
     public <T> T load( String urlTemplate, Class<T> resultType, Map<String, String> requiredArgs, Map<String, String> optionalArgs )
         throws IOException
     {
-        try
-        {
-            String url = fillTemplate( urlTemplate, requiredArgs, optionalArgs );
-            URI uri = URI.create( url );
-            HttpRequest request = HttpRequest.newBuilder( uri )
-                                             .GET()
-                                             .header( "Accept", "application/json plain/text" )
-                                             .header( "Accept-Language", "en-US,en;q=0.5" )
-                                             .header( "Authorization", "token " + token )
-                                             .build();
-            HttpResponse<String> response = client.send( request, HttpResponse.BodyHandlers.ofString( StandardCharsets.UTF_8 ) );
-            System.out.println( response.headers().firstValueAsLong( "X-RateLimit-Limit" ).orElse( 0 ) );
-            System.out.println( response.headers().firstValueAsLong( "X-RateLimit-Remaining" ).orElse( 0 ) );
-            System.out.println( LocalDateTime.ofEpochSecond( response.headers().firstValueAsLong( "X-RateLimit-Reset" ).orElse( 0 ), 0, ZoneOffset.ofHours( 8 ) ) );
-            if( response.statusCode() == 200 )
-            {
-                return mapper.readObject( response.body(), resultType );
-            }
-            else
-            {
-                System.err.println( "Unable to retrieve " + url + ". Error " + response.statusCode() + " : " + response.body() );
-                return null;
-            }
-        }
-        catch( InterruptedException e )
-        {
-            throw new IOException( "I/O communication was interrupted.", e );
-        }
+        throttle();
+        String url = fillTemplate( urlTemplate, requiredArgs, optionalArgs );
+        ClientResource clientResource = new ClientResource( url );
+        clientResource.accept( MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, Language.ENGLISH_US );
+        ChallengeResponse c = new ChallengeResponse( new ChallengeScheme( "", "" ) );
+        c.setRawValue( "token " + token );
+        clientResource.setChallengeResponse( c );
+        clientResource.setRetryAttempts( 2 );
+        clientResource.setRetryDelay( 3000 );
+        clientResource.setRetryOnError( true );
+        Representation representation = clientResource.get();
+        Response response = clientResource.getResponse();
+        Series<Header> headers = response.getHeaders();
+        String maxLimit = headers.getFirstValue( "X-RateLimit-Limit" );
+        String remainingLimit = headers.getFirstValue( "X-RateLimit-Remaining" );
+        String resetLimit = headers.getFirstValue( "X-RateLimit-Reset" );
+        StatisticsUtil.reportGithubAccess( maxLimit, remainingLimit, resetLimit );
+        // We had this before, how?
+        return mapper.readObject( representation.getStream(), resultType );
     }
 
     @Override
-    public CorralDescriptor loadCorralDescriptor( Repository repository, String version )
+    public CorralDescriptor loadCorralDescriptor( Repository repository, RepositoryVersion version )
         throws IOException
     {
-        String corralFileContent = loadBlob( repository, version, "corral.json" );
+        String corralFileContent = loadBlob( repository, version.getName(), "corral.json" );
         if( corralFileContent == null )
         {
             return null;
         }
-        System.out.println("Loading corral.json in " + repository + " @ " + version );
+        System.out.println( "Loading corral.json in " + repository + " @ " + version );
         return mapper.readObject( corralFileContent, CorralDescriptor.class );
     }
 
     @Override
-    public String loadReadMe( Repository repository, String version )
+    public String loadReadMe( Repository repository, RepositoryVersion version )
         throws IOException
     {
-        return loadBlob( repository, version, "README.md" );
+        return loadBlob( repository, version.getName(), "README.md" );
     }
 
     @Override
-    public String loadLicense( Repository repository, String version )
+    public String loadLicense( Repository repository, RepositoryVersion version )
         throws IOException
     {
-        String license = loadBlob( repository, version, "LICENSE.txt" );
+        String license = loadBlob( repository, version.getName(), "LICENSE.txt" );
         if( license == null )
-            license = loadBlob( repository, version, "LICENSE.md" );
+        {
+            license = loadBlob( repository, version.getName(), "LICENSE.md" );
+        }
         if( license == null )
-            license = loadBlob( repository, version, "LICENSE" );
+        {
+            license = loadBlob( repository, version.getName(), "LICENSE" );
+        }
         return license;
+    }
+
+    @Override
+    public Repository fetchRepository( RepositoryIdentity identity )
+        throws IOException
+    {
+        String org = identity.getOwner();
+        String name = identity.getName();
+        return loadRepository( org, name );
+    }
+
+    @Override
+    public List<RepositoryVersion> loadVersions( Repository repo )
+        throws IOException
+    {
+        String template = ( (GitHubRepository) repo ).getTagsUrl();
+        GitHubTag[] tags = load( template, GitHubTag[].class, emptyMap(), emptyMap() );
+        List<RepositoryVersion> versionTags = Arrays.stream( tags )
+                                            .filter( v -> v.getName().matches( "[0-9]+(\\.[0-9]+)*" ) )
+                                            .collect( Collectors.toList() );
+        String defaultBranch = repo.getDefaultBranch();
+        versionTags.add( () -> defaultBranch );
+        return versionTags;
+    }
+
+    @Override
+    public BundleJson loadLegacyDeps( Repository repository, RepositoryVersion version )
+        throws IOException
+    {
+        String bundleJsonContent = loadBlob( repository, version.getName(), "bundle.json" );
+        if( bundleJsonContent == null )
+        {
+            return null;
+        }
+        System.out.println( "Loading bundle.json in " + repository + " @ " + version.getName() );
+        return mapper.readObject( bundleJsonContent, BundleJson.class );
+    }
+
+    @Override
+    public String identity()
+    {
+        return "gh";
     }
 
     public String loadBlob( Repository repository, String version, String... path )
@@ -153,7 +203,7 @@ public class GitHub
         {
             version = repository.getDefaultBranch();
         }
-        GitHubRepository repo = loadRepository( repository.getOrganization(), repository.getName() );
+        GitHubRepository repo = (GitHubRepository) repository;
         String template = repo.getTreesUrl();
         GitHubTree tree = load( template, GitHubTree.class, emptyMap(), singletonMap( "sha", version ) );
         for( String p : path )
@@ -184,7 +234,7 @@ public class GitHub
         String encoding = blob.getEncoding();
         if( encoding.equals( "base64" ) )
         {
-            String base64Content = blob.getContent().replace("\n", "").replace( "\\n", "" );
+            String base64Content = blob.getContent().replace( "\n", "" ).replace( "\\n", "" );
             byte[] decode = Base64.getDecoder().decode( base64Content );
             return new String( decode );
         }
@@ -216,10 +266,32 @@ public class GitHub
         try
         {
             System.getProperties().load( new FileInputStream( "/etc/pony/ponyactor/main.actor.properties" ) );
-            token = System.getProperty( "github.token" );
         }
         catch( IOException e )
         {
+            // ignore, happens on development system.
+        }
+        token = System.getProperty( "github.token" );
+    }
+
+    private void throttle()
+    {
+        try
+        {
+            long limit = StatisticsUtil.getGithubRemainingLimit();
+            if( limit < 20 )
+            {
+                ZonedDateTime resetAt = StatisticsUtil.getGithubResetLimit();
+                if( ZonedDateTime.now().isBefore( resetAt ) )
+                {
+                    System.out.println("WARNING: Throttling access to GitHub, as Request Limit is approaching.");
+                    Thread.sleep( ZonedDateTime.now().until( resetAt, MILLIS ) );
+                }
+            }
+        } catch( InterruptedException e )
+        {
+            // ignore
         }
     }
+
 }

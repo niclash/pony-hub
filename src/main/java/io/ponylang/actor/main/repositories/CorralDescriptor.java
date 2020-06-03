@@ -1,4 +1,4 @@
-package io.ponylang.actor.main.project;
+package io.ponylang.actor.main.repositories;
 
 import io.ponylang.actor.main.repositories.Repository;
 import java.util.ArrayList;
@@ -6,30 +6,8 @@ import java.util.List;
 
 public class CorralDescriptor
 {
-    private Repository repository;
-    private String version;
     private List<Dependency> deps = new ArrayList<>();
     private Info info;
-
-    public Repository getRepository()
-    {
-        return repository;
-    }
-
-    public void setRepository( Repository repository )
-    {
-        this.repository = repository;
-    }
-
-    public String getVersion()
-    {
-        return version;
-    }
-
-    public void setVersion( String version )
-    {
-        this.version = version;
-    }
 
     public List<Dependency> getDeps()
     {
@@ -63,6 +41,8 @@ public class CorralDescriptor
 
         public void setLocator( String locator )
         {
+            if( locator.endsWith( ".git" ))
+                locator = locator.substring( 0, locator.length() - 4 );
             this.locator = locator;
         }
 
@@ -79,5 +59,20 @@ public class CorralDescriptor
 
     public static class Info
     {
+        private String name;
+
+        public Info()
+        {
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName( String name )
+        {
+            this.name = name;
+        }
     }
 }
