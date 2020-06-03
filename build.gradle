@@ -28,8 +28,7 @@ java {
 }
 compileJava.options.encoding = 'UTF-8'
 
-group 'io.ponylang'
-version '1.0-SNAPSHOT'
+group 'io.bali.ponyhub'
 
 repositories {
     jcenter()
@@ -38,11 +37,8 @@ repositories {
 }
 
 def restlet_version = '2.4.3'
-
 dependencies {
-    compile "org.apache.johnzon:johnzon-core:1.2.5"
-    compile "org.apache.johnzon:johnzon-mapper:1.2.5"
-    compile "javax.json:javax.json-api:1.1.4"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.0"
     compile "org.restlet.jee:org.restlet:$restlet_version"
     compile "org.restlet.jee:org.restlet.ext.servlet:$restlet_version"
     compile "org.restlet.jee:org.restlet.ext.jackson:$restlet_version"
@@ -63,17 +59,17 @@ if( tasks.findByName("distZip")){
 }
 
 tasks.release.dependsOn tasks.assemble
-mainClassName = 'io.ponylang.actor.main.Main'
+mainClassName = 'io.bali.ponyhub.Main'
 
 ospackage_application {
-    prefix = '/usr/local/lib/pony/'
+    prefix = '/usr/local/lib/'
 }
 
 ospackage {
-    user = "ponyactor"
+    user = "pony"
     postInstall file('src/main/scripts/post-install.sh')
     preUninstall file('src/main/scripts/pre-uninstall.sh')
-    into '/usr/local/lib/pony/' + project.name
+    into '/usr/local/lib/' + project.name
 
     from('bin') {
         fileType = CONFIG | NOREPLACE
@@ -81,23 +77,26 @@ ospackage {
     }
 
     from('src/main/dist/resources') {
-        into '/usr/local/lib/pony/' + project.name + "/resources"
+        into '/usr/local/lib/' + project.name + "/resources"
     }
 
     from(jar.outputs.files) {
-        into '/usr/local/lib/pony/' + project.name + '/lib'
+        into '/usr/local/lib/' + project.name + '/lib'
     }
 
     from('src/main/conf') {
         fileType = CONFIG | NOREPLACE
         include "*/**"
         exclude "*backup*"
-        into '/etc/pony/' + project.name + '/'
+        into '/etc/' + project.name + '/'
     }
 
     from('src/main/webapp') {
         fileType = CONFIG | NOREPLACE
-        into '/var/www/pony/' + project.name + '/'
+
+        // Too tired to figure out how to put it into a webapp, and since I will run on
+        // a dedicated host, it doesn't pay off to worry about it now.
+        into '/var/www/html/'
     }
 }
 
@@ -106,7 +105,7 @@ task packDeb(type: Deb) {
 
 buildDeb {
     requires("openjdk-11-jre-headless")
-    link('/etc/systemd/system/' + project.name + '.service', '/usr/local/lib/pony/' + project.name + '/bin/' + project.name + '.service')
+    link('/etc/systemd/system/' + project.name + '.service', '/usr/local/lib/' + project.name + '/bin/' + project.name + '.service')
 }
 
 assemble.dependsOn buildDeb

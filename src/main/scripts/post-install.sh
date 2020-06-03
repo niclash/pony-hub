@@ -1,12 +1,12 @@
 #!/bin/sh
-USER=ponyactor
+USER=pony
 GROUP=nogroup
 adduser --system --quiet $USER
-LOG_DIR=/var/log/pony/ponyactor
+LOG_DIR=/var/log/ponyhub
 if [ ! -d  $LOG_DIR ] ; then
     mkdir -p $LOG_DIR
 fi
 chown $USER:$GROUP $LOG_DIR
 
-systemctl enable ponyactor
-service ponyactor start
+systemctl enable ponyhub
+service ponyhub start

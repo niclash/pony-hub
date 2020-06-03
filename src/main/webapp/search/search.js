@@ -10,23 +10,17 @@ angular.module('ponyhub.search', ['ngRoute'])
     .controller('SearchCtrl', ['$scope', function ($scope) {
         $scope.searchFreeText = function () {
             let searchData = window.document.getElementById("searchTerm").value;
-            let query = {
-                query: {
-                    match: {
-                        message: {
-                            query: searchData
-                        }
-                    }
-                }
-            }
+            let query = "free:" + searchData;
             $scope.search(query, function(resp, success){
                 if( success )
                 {
-
+                    $scope.searchResult = resp;
                 }
                 else
                 {
-
+                    $scope.searchResult = {
+                        name: "error occured"
+                    }
                 }
             });
         };

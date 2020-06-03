@@ -1,12 +1,13 @@
-<div class="row" style="height:100%;">
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-    <h1>Search</h1>
+<div>
+  <div role="main" class="col-md-12 ml-sm-auto col-lg-10 px-4">
+    <h2>Search</h2>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <form >
+      <form>
         <div class="form-row align-items-center">
           <div class="col-auto">
             <label class="sr-only" for="searchTerm">Free text, tags and/or keywords...</label>
-            <input size="70" type="text" class="form-control mb-2" id="searchTerm" placeholder="Free text, tags and/or keywords...">
+            <input maxlength="300" size="50" type="text" class="form-control mb-2" id="searchTerm"
+                   placeholder="Free text, tags and/or keywords...">
           </div>
           <div class="col-auto">
             <button type="submit" ng-click="searchFreeText()" class="btn btn-primary mb-2">Search</button>
@@ -14,5 +15,20 @@
         </div>
       </form>
     </div>
-  </main>
+  </div>
+
+  <div role="main" class="col-md-12 ml-sm-auto col-lg-10 px-4">
+    <h2 ng-if="searchResult">Result</h2>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <div ng-repeat="s in searchResult">
+        <div>
+          <a href="https://{{s.host}}/{{s.organization}}/{{s.name}}">{{s.host}}/{{s.organization}}/{{s.name}}</a> @
+          {{s.version}}<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;{{s.description}}<br/><br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;{{s.excerpt}}
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
