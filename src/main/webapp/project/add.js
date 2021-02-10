@@ -18,7 +18,7 @@ angular.module('ponyhub.add_project', ['ngRoute'])
                 if(pos > 0 )
                 {
                     version = locator.substring(pos+1);
-                    locator = locator.substrin(0,pos);
+                    locator = locator.substring(0,pos);
                 }
                 $scope.registerProject(locator, version);
             }

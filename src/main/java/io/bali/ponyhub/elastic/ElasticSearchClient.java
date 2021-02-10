@@ -53,7 +53,7 @@ public class ElasticSearchClient
         }
         catch( ResourceException e )
         {
-            System.out.println( "Error with store: " + e.getStatus() );
+            System.err.println( "Error with store: " + e.getStatus() );
             return false;
         }
     }
@@ -83,7 +83,7 @@ public class ElasticSearchClient
         try
         {
             request.put( new StringRepresentation( body, MediaType.APPLICATION_JSON ) );
-            System.out.println( "Success: [" + request + "]" );
+//            System.out.println( "Success: [" + request + "]" );
         }
         catch( ResourceException e )
         {
@@ -129,12 +129,11 @@ public class ElasticSearchClient
     public String findProjectByIdentity( String host, String owner, String name, String version )
         throws IOException
     {
-        String count = count( INDEX_VERSIONED_STATE );
+//        String count = count( INDEX_VERSIONED_STATE );
         String id = escape( host ) + "_" + escape( owner ) + "_" + escape( name ) + "_" + escape( version );
         try
         {
             ClientResource request = createDocRequest( id, INDEX_VERSIONED_STATE );
-            System.out.println( "Requesting document: " + request );
             Representation representation = request.get();
             return representation.getText();
         }
@@ -154,7 +153,7 @@ public class ElasticSearchClient
 
     private ClientResource newClientResource( String url )
     {
-        System.out.println( "Create request: " + url );
+//        System.out.println( "Create request: " + url );
         ClientResource clientResource = new ClientResource( url );
         clientResource.accept( MediaType.APPLICATION_JSON, Language.ENGLISH_US );
         return clientResource;
@@ -206,7 +205,7 @@ public class ElasticSearchClient
             ClientResource request = newClientResource( url );
             Representation representation = request.post( new StringRepresentation( searchSpecificationJson, MediaType.APPLICATION_JSON ) );
             String body = representation.getText();
-            System.out.println( body );
+//            System.out.println( body );
             return body;
         }
         catch( ResourceException e )
@@ -240,7 +239,7 @@ public class ElasticSearchClient
             ClientResource request = newClientResource( url );
             Representation representation = request.get();
             String body = representation.getText();
-            System.out.println( body );
+//            System.out.println( body );
             return body;
         }
         catch( ResourceException e )

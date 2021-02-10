@@ -2,12 +2,14 @@ package io.bali.ponyhub.repositories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CorralDescriptor
 {
     private List<Dependency> deps = new ArrayList<>();
     private Info info;
     private List<String> packages;
+    private List<Map<String, Map<String, String>>> scripts;
 
     public List<Dependency> getDeps()
     {
@@ -39,6 +41,16 @@ public class CorralDescriptor
         this.packages = packages;
     }
 
+    public List<Map<String, Map<String, String>>> getScripts()
+    {
+        return scripts;
+    }
+
+    public void setScripts( List<Map<String, Map<String, String>>> scripts )
+    {
+        this.scripts = scripts;
+    }
+
     public static class Dependency
     {
         private String locator;
@@ -51,8 +63,10 @@ public class CorralDescriptor
 
         public void setLocator( String locator )
         {
-            if( locator.endsWith( ".git" ))
+            if( locator.endsWith( ".git" ) )
+            {
                 locator = locator.substring( 0, locator.length() - 4 );
+            }
             this.locator = locator;
         }
 

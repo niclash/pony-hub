@@ -106,7 +106,7 @@ public class SearchRestlet extends Restlet
                           }
                       } )
                       .collect( Collectors.toList() );
-            System.out.println( body + "\n" + results );
+//            System.out.println( body + "\n" + results );
             response.setEntity( elastic.mapper.writeValueAsString( results ), MediaType.APPLICATION_JSON );
             response.setStatus( Status.SUCCESS_OK );
         }

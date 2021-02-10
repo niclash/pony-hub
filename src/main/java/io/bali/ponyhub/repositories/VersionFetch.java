@@ -26,7 +26,7 @@ public class VersionFetch
             RepositoryScan.executor.submit( k );
             return Instant.now();
         } );
-        System.out.println( "Schedule " + repository + " : " + version + " @ " + now.toString() );
+//        System.out.println( "Schedule " + repository + " : " + version + " @ " + now.toString() );
     }
 
     private VersionFetch( Repository repository, RepositoryVersion version, ElasticSearchClient elastic, boolean force )

@@ -116,7 +116,6 @@ public class GitHub
             String resetLimit = headers.getFirstValue( "X-RateLimit-Reset" );
             StatisticsUtil.reportGithubAccess( maxLimit, remainingLimit, resetLimit );
             String json = representation.getText();
-            System.out.println(json);
             return mapper.readValue( json, resultType );
         }
         catch( IOException e )
@@ -135,7 +134,7 @@ public class GitHub
         {
             return null;
         }
-        System.out.println( "Loading corral.json in " + repository + " @ " + version );
+//        System.out.println( "Loading corral.json in " + repository + " @ " + version );
         return mapper.readValue( corralFileContent, CorralDescriptor.class );
     }
 
@@ -178,7 +177,7 @@ public class GitHub
         {
             return null;
         }
-        System.out.println( "Loading bundle.json in " + repository + " @ " + version.getName() );
+//        System.out.println( "Loading bundle.json in " + repository + " @ " + version.getName() );
         return mapper.readValue( bundleJsonContent, BundleJson.class );
     }
 
