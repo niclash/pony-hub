@@ -2,6 +2,7 @@ package io.bali.ponyhub.repositories;
 
 import io.bali.ponyhub.elastic.ElasticSearchClient;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VersionFetch
@@ -67,16 +68,20 @@ public class VersionFetch
                 }
                 if( bundleJson != null )
                 {
-                    for( BundleJson.Dependency dep : bundleJson.deps )
+                    List<BundleJson.Dependency> deps = bundleJson.deps;
+                    if( deps != null )
                     {
-                        try
+                        for( BundleJson.Dependency dep : deps )
                         {
-                            RepositoryIdentity repoId = IdentityResolver.parseBundleJsonRef( dep.type, dep.repo );
-                            RepositoryScan.scanRepository( repoId, elastic, false );
-                        }
-                        catch( Exception e )
-                        {
-                            System.err.println( "Invalid Dependency reference in bundle.json for " + repository + " @ " + version );
+                            try
+                            {
+                                RepositoryIdentity repoId = IdentityResolver.parseBundleJsonRef( dep.type, dep.repo );
+                                RepositoryScan.scanRepository( repoId, elastic, false );
+                            }
+                            catch( Exception e )
+                            {
+                                System.err.println( "Invalid Dependency reference in bundle.json for " + repository + " @ " + version );
+                            }
                         }
                     }
                 }
