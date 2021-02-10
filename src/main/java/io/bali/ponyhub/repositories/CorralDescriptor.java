@@ -41,12 +41,12 @@ public class CorralDescriptor
         this.packages = packages;
     }
 
-    public List<Map<String, Map<String, String>>> getScripts()
+    public Map<String, Map<String, String>> getScripts()
     {
         return scripts;
     }
 
-    public void setScripts( List<Map<String, Map<String, String>>> scripts )
+    public void setScripts( Map<String, Map<String, String>> scripts )
     {
         this.scripts = scripts;
     }
