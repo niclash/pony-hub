@@ -19,12 +19,14 @@ public class RepositoryScan
 
     public static void scanRepository( RepositoryIdentity repoId, ElasticSearchClient elastic, boolean force )
     {
+        System.out.println( recentFetches );
         Instant fiftenMinutesAgo = Instant.now().minusSeconds( 900 );
         recentFetches.entrySet()
-                     .removeIf( entry -> entry.getValue().isBefore( fiftenMinutesAgo ) );
+            .removeIf( entry -> entry.getValue().isBefore( fiftenMinutesAgo ) );
 
         RepositoryScan scan = new RepositoryScan( repoId, elastic, force );
-        recentFetches.computeIfAbsent( scan, k -> {
+        recentFetches.computeIfAbsent( scan, k ->
+        {
             executor.submit( k );
             return Instant.now();
         } );
@@ -42,7 +44,7 @@ public class RepositoryScan
     {
         try
         {
-            System.out.println("Scanning " + repoId);
+            System.out.println( "Scanning " + repoId );
             RepositoryHost repositoryHost = IdentityResolver.hostOf( repoId );
             if( repositoryHost != null )
             {
@@ -88,5 +90,11 @@ public class RepositoryScan
         int result = repoId.hashCode();
         result = 31 * result + elastic.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "RepositoryScan{" + repoId + '}';
     }
 }
