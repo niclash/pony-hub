@@ -19,7 +19,6 @@ public class RepositoryScan
 
     public static void scanRepository( RepositoryIdentity repoId, ElasticSearchClient elastic, boolean force )
     {
-        System.out.println( recentFetches );
         Instant fiftenMinutesAgo = Instant.now().minusSeconds( 900 );
         recentFetches.entrySet()
             .removeIf( entry -> entry.getValue().isBefore( fiftenMinutesAgo ) );

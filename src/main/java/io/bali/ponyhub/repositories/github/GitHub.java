@@ -28,6 +28,7 @@ import org.restlet.data.Language;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 import org.restlet.util.Series;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
@@ -105,16 +106,24 @@ public class GitHub
         clientResource.setRetryAttempts( 2 );
         clientResource.setRetryDelay( 3000 );
         clientResource.setRetryOnError( true );
-        Representation representation = clientResource.get();
-        Response response = clientResource.getResponse();
-        Series<Header> headers = response.getHeaders();
-        String maxLimit = headers.getFirstValue( "X-RateLimit-Limit" );
-        String remainingLimit = headers.getFirstValue( "X-RateLimit-Remaining" );
-        String resetLimit = headers.getFirstValue( "X-RateLimit-Reset" );
-        StatisticsUtil.reportGithubAccess( maxLimit, remainingLimit, resetLimit );
-        String json = representation.getText();
-        System.out.println(json);
-        return mapper.readValue( json, resultType );
+        try
+        {
+            Representation representation = clientResource.get();
+            Response response = clientResource.getResponse();
+            Series<Header> headers = response.getHeaders();
+            String maxLimit = headers.getFirstValue( "X-RateLimit-Limit" );
+            String remainingLimit = headers.getFirstValue( "X-RateLimit-Remaining" );
+            String resetLimit = headers.getFirstValue( "X-RateLimit-Reset" );
+            StatisticsUtil.reportGithubAccess( maxLimit, remainingLimit, resetLimit );
+            String json = representation.getText();
+            System.out.println(json);
+            return mapper.readValue( json, resultType );
+        }
+        catch( IOException e )
+        {
+            System.err.println("Can not access " + url );
+            throw e;
+        }
     }
 
     @Override
