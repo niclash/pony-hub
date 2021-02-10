@@ -17,14 +17,16 @@ public class VersionFetch
     {
         Instant fiftenMinutesAgo = Instant.now().minusSeconds( 900 );
         recentFetches.entrySet()
-                     .removeIf( entry -> entry.getValue().isBefore( fiftenMinutesAgo ) );
+            .removeIf( entry -> entry.getValue().isBefore( fiftenMinutesAgo ) );
 
         VersionFetch vf = new VersionFetch( repository, version, elastic, force );
 
-        recentFetches.computeIfAbsent( vf, k -> {
+        Instant now = recentFetches.computeIfAbsent( vf, k ->
+        {
             RepositoryScan.executor.submit( k );
             return Instant.now();
         } );
+        System.out.println( "Schedule " + repository + " : " + version + " @ " + now.toString() );
     }
 
     private VersionFetch( Repository repository, RepositoryVersion version, ElasticSearchClient elastic, boolean force )

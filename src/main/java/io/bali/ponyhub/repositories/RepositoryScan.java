@@ -42,6 +42,7 @@ public class RepositoryScan
     {
         try
         {
+            System.out.println("Scanning " + repoId);
             RepositoryHost repositoryHost = IdentityResolver.hostOf( repoId );
             if( repositoryHost != null )
             {
