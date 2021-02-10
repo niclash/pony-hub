@@ -24,7 +24,7 @@ public class Scheduler
 
     public void start()
     {
-        future = executor.scheduleWithFixedDelay( new Puller( elastic ), 2, 1658, TimeUnit.MINUTES );
+        future = executor.scheduleWithFixedDelay( new Puller( elastic ), 1, 1658, TimeUnit.MINUTES );
     }
 
     public void stop()

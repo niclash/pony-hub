@@ -102,13 +102,10 @@ public class ElasticSearchClient
             JsonParser parser = mapper.createParser( representation.getText() );
             while( parser.hasCurrentToken() )
             {
-                JsonToken token = parser.nextToken();
-                if( token == JsonToken.FIELD_NAME )
+                parser.nextValue();
+                if( parser.currentName().equals( "_source" ) )
                 {
-                    if( parser.currentName().equals( "_source" ) )
-                    {
-                        return parser.readValueAs( type );
-                    }
+                    return parser.readValueAs( type );
                 }
             }
             return null;
