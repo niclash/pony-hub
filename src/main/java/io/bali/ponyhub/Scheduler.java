@@ -57,7 +57,7 @@ public class Scheduler
                     if( repository != null )
                     {
                         RepositoryScan.scanRepository( IdentityResolver.parse( repository.url ), elastic, true );
-                        Thread.sleep( 100 );        // throttle down a little bit.
+                        Thread.sleep( 1000 );        // throttle down a little bit.
                     }
                 }
             }

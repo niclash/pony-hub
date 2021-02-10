@@ -7,6 +7,7 @@ public class CorralDescriptor
 {
     private List<Dependency> deps = new ArrayList<>();
     private Info info;
+    private List<String> packages;
 
     public List<Dependency> getDeps()
     {
@@ -26,6 +27,16 @@ public class CorralDescriptor
     public void setInfo( Info info )
     {
         this.info = info;
+    }
+
+    public List<String> getPackages()
+    {
+        return packages;
+    }
+
+    public void setPackages( List<String> packages )
+    {
+        this.packages = packages;
     }
 
     public static class Dependency
@@ -60,5 +71,9 @@ public class CorralDescriptor
     {
         public String name;
         public String description;
+        public String homepage;
+        public String license;
+        public String documentation_url;
+        public String version;
     }
 }
