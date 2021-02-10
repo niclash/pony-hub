@@ -47,12 +47,13 @@ public class Scheduler
         {
             try
             {
-                SearchResult result = elastic.findAllDocs( "repository" );   // Find all "repository" documents.
+                String indexName = "repository";
+                SearchResult result = elastic.findAllDocs( indexName );   // Find all "repository" documents.
                 for( Hit hit : result.getHits().getHits() )
                 {
                     String id = hit.getId();
                     System.out.println("Checking: " + id);
-                    GitHubRepository repository = elastic.loadDocument( null, id, GitHubRepository.class );
+                    GitHubRepository repository = elastic.loadDocument( indexName, id, GitHubRepository.class );
                     if( repository != null )
                     {
                         RepositoryScan.scanRepository( IdentityResolver.parse( repository.url ), elastic, true );

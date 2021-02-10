@@ -320,7 +320,9 @@ public class ElasticSearchClient
                                                     + "    }\n"
                                                     + "}";
 
+    // MAX 10,000 repositories. Soon after that we need to come up with pagination of resultsets. Currently 123 repositories.
     private static final String QUERY_ALL_DOCS = "{ \n"
+                                                 + "    \"size\" : 10000,\n"
                                                  + "    \"query\" : { \n"
                                                  + "        \"match_all\" : {} \n"
                                                  + "    },\n"
