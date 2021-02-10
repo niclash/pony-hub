@@ -103,12 +103,14 @@ public class ElasticSearchClient
             while( parser.hasCurrentToken() )
             {
                 parser.nextValue();
-                if( parser.currentName().equals( "_source" ) )
+                String currentName = parser.currentName();
+                System.out.println(currentName);
+                if( currentName.equals( "_source" ) )
                 {
                     return parser.readValueAs( type );
                 }
             }
-            return null;
+            throw new InternalError();
         }
         catch( ResourceException e )
         {
