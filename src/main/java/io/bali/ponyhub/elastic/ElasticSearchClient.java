@@ -99,8 +99,7 @@ public class ElasticSearchClient
         try
         {
             Representation representation = request.get();
-            System.out.println( "Loaded document: " + docId + "  ==>  " + representation.getText() );
-            JsonParser parser = mapper.createParser( representation.getStream() );
+            JsonParser parser = mapper.createParser( representation.getText() );
             while( parser.hasCurrentToken() )
             {
                 JsonToken token = parser.nextToken();
