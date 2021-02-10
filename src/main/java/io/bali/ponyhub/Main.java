@@ -18,6 +18,7 @@ public class Main
 {
     private static String ROOT_URI;
     public static ElasticSearchClient elastic;
+    private static Scheduler scheduler;
 
     public static void main( String[] args )
         throws Exception
@@ -53,5 +54,7 @@ public class Main
         host.attach( "/ov/", OverviewResource.OverviewServerResource.class );
         host.attach( application );
         component.start();
+        scheduler = new Scheduler( elastic );
+        scheduler.start();
     }
 }

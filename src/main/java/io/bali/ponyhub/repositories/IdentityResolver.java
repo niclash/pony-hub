@@ -15,6 +15,14 @@ public class IdentityResolver
 
     public static RepositoryIdentity parse( String locator )
     {
+        if( locator.startsWith( "https://" ) )
+        {
+            locator = locator.substring( 8 );
+        }
+        if( locator.startsWith( "http://" ) )
+        {
+            locator = locator.substring( 7 );
+        }
         if( locator.startsWith( "github.com" ) )
         {
             String[] parts = locator.split( "/" );
@@ -48,7 +56,7 @@ public class IdentityResolver
         catch( Exception e )
         {
             String msg = "Unable to parse bundle.json : " + type + " => " + repo;
-            throw new IllegalArgumentException(msg, e);
+            throw new IllegalArgumentException( msg, e );
         }
     }
 }

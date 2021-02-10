@@ -90,10 +90,10 @@ public class ElasticSearchClient
         }
     }
 
-    private <T> T loadItem( String index, RepositoryIdentity repoId, Class<T> type )
+    public <T> T loadDocument( String index, String docId, Class<T> type )
         throws IOException
     {
-        ClientResource request = createDocRequest( repoId.toIdentifier(), index );
+        ClientResource request = createDocRequest( docId, index );
         try
         {
             Representation representation = request.get();
@@ -157,7 +157,23 @@ public class ElasticSearchClient
         return text.replace( "\"", "\\\"" );
     }
 
-    public String search( String index, String searchSpecificationJson )
+    public SearchResult search( String index, String queryJson )
+        throws IOException
+    {
+        if( index == null )
+        {
+            index = "repository";
+        }
+        String query = String.format( QUERY_WITH_LUCENE, queryJson );
+        String url = "http://[::1]:9200/" + index + "/_search";
+        ClientResource request = newClientResource( url );
+        Representation representation = request.post( new StringRepresentation( query, MediaType.APPLICATION_JSON ) );
+        JacksonRepresentation<SearchResult> rep = new JacksonRepresentation<>( representation, SearchResult.class );
+        rep.setObjectMapper( mapper );
+        return rep.getObject();
+    }
+
+    public String searchRaw( String index, String searchSpecificationJson )
         throws IOException
     {
         if( index == null )
@@ -180,6 +196,21 @@ public class ElasticSearchClient
         }
     }
 
+    public SearchResult findAllDocs( String index )
+        throws IOException
+    {
+        if( index == null )
+        {
+            index = "repository";
+        }
+        String url = "http://[::1]:9200/" + index + "/_search";
+        ClientResource request = newClientResource( url );
+        Representation representation = request.post( new StringRepresentation( QUERY_ALL_DOCS, MediaType.APPLICATION_JSON ) );
+        JacksonRepresentation<SearchResult> rep = new JacksonRepresentation<>( representation, SearchResult.class );
+        rep.setObjectMapper( mapper );
+        return rep.getObject();
+    }
+
     private String count( String index )
         throws IOException
     {
@@ -199,8 +230,7 @@ public class ElasticSearchClient
                 // Happens when the Elastic Search store is empty, before filling things in.
                 // Return a fake "empty", i.e. count=0 and buckets is empty.
                 return "{\"count\":0,\"aggregations\":{\"owners\":{\"doc_count_error_upper_bound\":0,\"sum_other_doc_count\":0,\"buckets\":[]}}}";
-            }
-            else
+            } else
             {
                 System.err.println( "Unable to retrieve " + url + ". Error " + e.getStatus() );
                 throw new IOException( "I/O communication was interrupted.", e );
@@ -213,7 +243,7 @@ public class ElasticSearchClient
     {
         try
         {
-            String searchResult = search( INDEX_REPOSITORY, QUERY_ORGCOUNT );
+            String searchResult = searchRaw( INDEX_REPOSITORY, QUERY_ORGCOUNT );
             Map m1 = mapper.readValue( searchResult, Map.class );
             Map m2 = (Map) m1.get( "aggregations" );
             Map m3 = (Map) m2.get( "orgCount" );
@@ -288,4 +318,11 @@ public class ElasticSearchClient
                                                     + "        }\n"
                                                     + "    }\n"
                                                     + "}";
+
+    private static final String QUERY_ALL_DOCS = "{ \n"
+                                                 + "    \"query\" : { \n"
+                                                 + "        \"match_all\" : {} \n"
+                                                 + "    },\n"
+                                                 + "    \"stored_fields\": []\n"
+                                                 + "}";
 }
