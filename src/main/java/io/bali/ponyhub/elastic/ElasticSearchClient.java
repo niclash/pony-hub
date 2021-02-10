@@ -1,5 +1,7 @@
 package io.bali.ponyhub.elastic;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.bali.ponyhub.StatisticsUtil;
@@ -98,7 +100,19 @@ public class ElasticSearchClient
         {
             Representation representation = request.get();
             System.out.println( "Loaded document: " + docId + "  ==>  " + representation.getText() );
-            return mapper.readValue( representation.getStream(), type );
+            JsonParser parser = mapper.createParser( representation.getStream() );
+            while( parser.hasCurrentToken() )
+            {
+                JsonToken token = parser.nextToken();
+                if( token == JsonToken.FIELD_NAME )
+                {
+                    if( parser.currentName().equals( "_source" ) )
+                    {
+                        return parser.readValueAs( type );
+                    }
+                }
+            }
+            return null;
         }
         catch( ResourceException e )
         {
