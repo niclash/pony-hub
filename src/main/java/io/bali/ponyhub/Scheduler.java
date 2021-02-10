@@ -52,7 +52,6 @@ public class Scheduler
                 for( Hit hit : result.getHits().getHits() )
                 {
                     String id = hit.getId();
-                    System.out.println("Checking: " + id);
                     GitHubRepository repository = elastic.loadDocument( indexName, id, GitHubRepository.class );
                     if( repository != null )
                     {

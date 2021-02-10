@@ -52,9 +52,9 @@ public class RepositoryScan
                 if( repo != null )
                 {
                     elastic.store( repo );
-                    List<RepositoryVersion> versions = repo.host().loadVersions( repo );
-                    versions.forEach( v -> VersionFetch.fetchVersion( repo, v, elastic, force ) );
                 }
+                List<RepositoryVersion> versions = repo.host().loadVersions( repo );
+                versions.forEach( v -> VersionFetch.fetchVersion( repo, v, elastic, force ) );
             }
         }
         catch( Throwable e )
