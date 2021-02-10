@@ -1,5 +1,5 @@
 [Unit]
-Description=Pony Main Actor, a search facility for Pony Language developers.
+Description=Pony Hub, a search facility for Pony Language developers.
 
 [Service]
 User=pony
