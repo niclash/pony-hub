@@ -99,22 +99,21 @@ public class ElasticSearchClient
         try
         {
             Representation representation = request.get();
-            System.out.println( "Niclas 1" );
             JsonParser parser = mapper.createParser( representation.getText() );
-            System.out.println( "Niclas 2" );
             while( true )
             {
-                JsonToken token = parser.nextValue();
+                JsonToken token = parser.nextToken();
                 if( token == null )
                 {
                     break;
                 }
-                if( token != JsonToken.NOT_AVAILABLE )
+                if( token == JsonToken.FIELD_NAME )
                 {
                     String currentName = parser.currentName();
                     System.out.println( currentName );
                     if( currentName.equals( "_source" ) )
                     {
+                        parser.nextValue();
                         return parser.readValueAs( type );
                     }
                 }
