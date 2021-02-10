@@ -1,5 +1,6 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.bali.ponyhub.StatisticsUtil;
@@ -177,8 +178,16 @@ public class GitHub
         {
             return null;
         }
-//        System.out.println( "Loading bundle.json in " + repository + " @ " + version.getName() );
-        return mapper.readValue( bundleJsonContent, BundleJson.class );
+        try
+        {
+            return mapper.readValue( bundleJsonContent, BundleJson.class );
+        }
+        catch( JsonProcessingException e )
+        {
+            System.err.println( "ERROR loading bundle.json in " + repository + " @ " + version.getName() );
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
