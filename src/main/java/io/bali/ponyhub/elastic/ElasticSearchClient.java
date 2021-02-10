@@ -97,6 +97,7 @@ public class ElasticSearchClient
         try
         {
             Representation representation = request.get();
+            System.out.println( "Loaded document: " + docId + "  ==>  " + representation.getText() );
             return mapper.readValue( representation.getStream(), type );
         }
         catch( ResourceException e )

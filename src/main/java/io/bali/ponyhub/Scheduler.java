@@ -51,9 +51,13 @@ public class Scheduler
                 for( Hit hit : result.getHits().getHits() )
                 {
                     String id = hit.getId();
+                    System.out.println("Checking: " + id);
                     GitHubRepository repository = elastic.loadDocument( null, id, GitHubRepository.class );
-                    RepositoryScan.scanRepository( IdentityResolver.parse( repository.url ), elastic, true );
-                    Thread.sleep( 100 );        // throttle down a little bit.
+                    if( repository != null )
+                    {
+                        RepositoryScan.scanRepository( IdentityResolver.parse( repository.url ), elastic, true );
+                        Thread.sleep( 100 );        // throttle down a little bit.
+                    }
                 }
             }
             catch( Exception e )
