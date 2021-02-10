@@ -110,7 +110,6 @@ public class ElasticSearchClient
                 if( token == JsonToken.FIELD_NAME )
                 {
                     String currentName = parser.currentName();
-                    System.out.println( currentName );
                     if( currentName.equals( "_source" ) )
                     {
                         parser.nextValue();
