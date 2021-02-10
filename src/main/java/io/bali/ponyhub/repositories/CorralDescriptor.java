@@ -9,7 +9,7 @@ public class CorralDescriptor
     private List<Dependency> deps = new ArrayList<>();
     private Info info;
     private List<String> packages;
-    private List<Map<String, Map<String, String>>> scripts;
+    private Map<String, Map<String, String>> scripts;
 
     public List<Dependency> getDeps()
     {
