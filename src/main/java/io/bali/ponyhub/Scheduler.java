@@ -55,7 +55,7 @@ public class Scheduler
                     GitHubRepository repository = elastic.loadDocument( indexName, id, GitHubRepository.class );
                     if( repository != null )
                     {
-                        RepositoryScan.scanRepository( IdentityResolver.parse( repository.html_url ), elastic, true );
+                        RepositoryScan.scanRepository( IdentityResolver.parse( repository.html_url ), elastic, false );
                         Thread.sleep( 1000 );        // throttle down a little bit.
                     }
                 }
