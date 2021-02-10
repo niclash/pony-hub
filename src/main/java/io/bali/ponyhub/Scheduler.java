@@ -53,6 +53,7 @@ public class Scheduler
                 {
                     String id = hit.getId();
                     GitHubRepository repository = elastic.loadDocument( indexName, id, GitHubRepository.class );
+                    System.out.println(repository);
                     if( repository != null )
                     {
                         RepositoryScan.scanRepository( IdentityResolver.parse( repository.url ), elastic, true );
