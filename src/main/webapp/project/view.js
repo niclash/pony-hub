@@ -17,6 +17,12 @@ angular.module('ponyhub.view_project', ['ngRoute'])
                 if (success) {
                     $scope.projectData = response;
                     $log.info("Fetched project.", $scope.projectData);
+                    $scope.rendered = marked($scope.projectData._source.readMe);
+
                 }
             });
+        $scope.renderReadme = function() {
+            console.log("Render:", $scope.rendered);
+            return $scope.rendered;
+        }
     }]);
