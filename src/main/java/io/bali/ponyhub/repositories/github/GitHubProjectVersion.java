@@ -1,5 +1,6 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.bali.ponyhub.repositories.BundleJson;
 import io.bali.ponyhub.repositories.CorralDescriptor;
 import io.bali.ponyhub.repositories.ProjectVersion;
@@ -8,6 +9,7 @@ import io.bali.ponyhub.repositories.RepositoryVersion;
 
 import static io.bali.ponyhub.repositories.IdentityResolver.escape;
 
+@JsonIgnoreProperties
 public class GitHubProjectVersion
     implements ProjectVersion
 {

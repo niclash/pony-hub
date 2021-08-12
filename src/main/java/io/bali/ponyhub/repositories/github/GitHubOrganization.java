@@ -1,7 +1,9 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.ZonedDateTime;
 
+@JsonIgnoreProperties
 public class GitHubOrganization
 {
     public String login;

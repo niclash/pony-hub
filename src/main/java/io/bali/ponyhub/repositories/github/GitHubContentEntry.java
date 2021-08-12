@@ -1,7 +1,9 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties
 public class GitHubContentEntry
 {
     public String name;

@@ -1,5 +1,8 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties
 public class GitHubTree
 {
     public String sha;
@@ -7,6 +10,7 @@ public class GitHubTree
     public boolean truncated;
     public Node[] tree;
 
+    @JsonIgnoreProperties
     public static class Node
     {
         public String path;

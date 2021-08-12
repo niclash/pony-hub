@@ -1,7 +1,9 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.bali.ponyhub.repositories.RepositoryVersion;
 
+@JsonIgnoreProperties
 public class GitHubTag
     implements RepositoryVersion
 {

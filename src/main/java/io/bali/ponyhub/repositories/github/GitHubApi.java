@@ -1,7 +1,8 @@
 package io.bali.ponyhub.repositories.github;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties
 public class GitHubApi
 {
     public String current_user_url;

@@ -1,7 +1,9 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.bali.ponyhub.repositories.Owner;
 
+@JsonIgnoreProperties
 public class GitHubOwner
     implements Owner
 {

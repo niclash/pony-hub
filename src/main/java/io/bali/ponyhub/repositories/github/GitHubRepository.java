@@ -1,11 +1,13 @@
 package io.bali.ponyhub.repositories.github;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bali.ponyhub.repositories.Repository;
 import io.bali.ponyhub.repositories.RepositoryHost;
 import io.bali.ponyhub.repositories.RepositoryIdentity;
 import java.time.ZonedDateTime;
 
+@JsonIgnoreProperties
 public class GitHubRepository
     implements Repository
 {
