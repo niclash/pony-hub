@@ -2,7 +2,7 @@ package io.bali.ponyhub.repositories.github;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class Permissions
 {
     public boolean admin;

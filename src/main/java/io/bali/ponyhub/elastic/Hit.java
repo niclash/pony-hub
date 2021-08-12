@@ -1,9 +1,11 @@
 package io.bali.ponyhub.elastic;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bali.ponyhub.repositories.ProjectVersion;
 import io.bali.ponyhub.repositories.github.GitHubProjectVersion;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hit
 {
     private String index;

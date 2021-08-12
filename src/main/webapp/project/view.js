@@ -16,7 +16,7 @@ angular.module('ponyhub.view_project', ['ngRoute'])
             function (response, success) {
                 if (success) {
                     $scope.projectData = response;
-                    $log.info("Fetched project.", $scope.projectData);
+                    $log.info("Fetched project." + JSON.stringify($scope.projectData));
                     $scope.rendered = marked($scope.projectData._source.readMe);
                     document.getElementById("readme").innerHTML = $scope.rendered;
                 }

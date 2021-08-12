@@ -9,7 +9,7 @@ import io.bali.ponyhub.repositories.RepositoryVersion;
 
 import static io.bali.ponyhub.repositories.IdentityResolver.escape;
 
-@JsonIgnoreProperties
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class GitHubProjectVersion
     implements ProjectVersion
 {
@@ -29,8 +29,7 @@ public class GitHubProjectVersion
         if( version.getName().equals( repository.getDefaultBranch() ) )
         {
             this.version = null;
-        }
-        else
+        } else
         {
             this.version = (GitHubTag) version;
         }

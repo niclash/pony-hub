@@ -1,5 +1,6 @@
 package io.bali.ponyhub.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.bali.ponyhub.elastic.ElasticSearchClient;
 import io.bali.ponyhub.elastic.Hit;
 import io.bali.ponyhub.repositories.ProjectVersion;
@@ -119,14 +120,11 @@ public class SearchRestlet extends Restlet
     private String hostOf( Hit hit )
     {
         String id = hit.getId();
-        if( id.startsWith( "gh_" ) )
-        {
-            return "github.com";
-        }
         int pos = id.indexOf( '_' );
         return id.substring( 0, pos );
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SearchResult
     {
         private final String host;

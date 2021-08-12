@@ -3,7 +3,7 @@ package io.bali.ponyhub.repositories.github;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.ZonedDateTime;
 
-@JsonIgnoreProperties
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class GitHubUser
 {
     public String login;

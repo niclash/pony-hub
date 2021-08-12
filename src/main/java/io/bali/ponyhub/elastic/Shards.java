@@ -1,5 +1,8 @@
 package io.bali.ponyhub.elastic;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Shards
 {
     private int total;

@@ -15,7 +15,7 @@ public class BundleJson
 
         public String tag;
 
-        @JsonProperty("local-path")
+        @JsonProperty( "local-path" )
         public String local;
     }
 }

@@ -3,6 +3,7 @@ package io.bali.ponyhub.repositories.github;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.bali.ponyhub.Main;
 import io.bali.ponyhub.StatisticsUtil;
 import io.bali.ponyhub.repositories.BundleJson;
 import io.bali.ponyhub.repositories.CorralDescriptor;
@@ -10,6 +11,7 @@ import io.bali.ponyhub.repositories.ProjectVersion;
 import io.bali.ponyhub.repositories.Repository;
 import io.bali.ponyhub.repositories.RepositoryHost;
 import io.bali.ponyhub.repositories.RepositoryIdentity;
+import io.bali.ponyhub.repositories.RepositoryScan;
 import io.bali.ponyhub.repositories.RepositoryVersion;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.restlet.Response;
 import org.restlet.data.ChallengeResponse;
@@ -29,7 +34,6 @@ import org.restlet.data.Language;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
 import org.restlet.util.Series;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
@@ -39,11 +43,19 @@ import static java.util.Collections.singletonMap;
 public class GitHub
     implements RepositoryHost
 {
-    public static final RepositoryHost INSTANCE = new GitHub();
+    public static final RepositoryHost INSTANCE;
+    private static final ScheduledExecutorService executor;
 
     private GitHubApi api;
+
     private String token;
     private final ObjectMapper mapper;
+
+    static
+    {
+        executor = Executors.newScheduledThreadPool( 1 );
+        INSTANCE = new GitHub();
+    }
 
     private GitHub()
     {
@@ -53,12 +65,37 @@ public class GitHub
         {
             initCredentials();
             api = load( "https://api.github.com", GitHubApi.class, emptyMap(), emptyMap() );
+            executor.scheduleAtFixedRate( this::searchForPonyRepositories, 0, 1440, TimeUnit.MINUTES );
         }
         catch( Exception e )
         {
             System.err.println( "Fatal Error. Can't reach GitHub's API" );
             e.printStackTrace();
             System.exit( 1 );
+        }
+    }
+
+    private void searchForPonyRepositories()
+    {
+        searchForPonyRepositories( "ponylang" );
+        searchForPonyRepositories( "pony-language" );
+    }
+
+    private void searchForPonyRepositories( String language )
+    {
+        try
+        {
+            Map<String, String> params = new HashMap<>();
+            params.put( "query", language );
+            GitHubRepositoriesSearchResult result = load( api.repository_search_url, GitHubRepositoriesSearchResult.class, params, emptyMap() );
+            for( GitHubRepository repo : result.items )
+            {
+                RepositoryScan.scanRepository( repo.identity(), Main.elastic, false );
+            }
+        }
+        catch( IOException e )
+        {
+            e.printStackTrace();
         }
     }
 
@@ -121,7 +158,7 @@ public class GitHub
         }
         catch( IOException e )
         {
-            System.err.println("Can not access " + url );
+            System.err.println( "Can not access " + url );
             throw e;
         }
     }
@@ -162,8 +199,8 @@ public class GitHub
         String template = ( (GitHubRepository) repo ).tags_url;
         GitHubTag[] tags = load( template, GitHubTag[].class, emptyMap(), emptyMap() );
         List<RepositoryVersion> versionTags = Arrays.stream( tags )
-                                                    .filter( v -> v.getName().matches( "[0-9]+(\\.[0-9]+)*" ) )
-                                                    .collect( Collectors.toList() );
+            .filter( v -> v.getName().matches( "[0-9]+(\\.[0-9]+)*" ) )
+            .collect( Collectors.toList() );
         String defaultBranch = repo.getDefaultBranch();
         versionTags.add( new NominalRepositoryVersion( defaultBranch ) );
         return versionTags;
@@ -252,9 +289,19 @@ public class GitHub
         {
             url = url.replace( "{/" + opt.getKey() + "}", "/" + opt.getValue() );
         }
+        for( Map.Entry<String, String> opt : optionalArgs.entrySet() )
+        {
+            url = url.replace( "{" + opt.getKey() + "}", opt.getValue() );
+        }
         while( url.contains( "{/" ) )
         {
             int start = url.indexOf( "{/" );
+            int end = url.indexOf( "}", start );
+            url = url.substring( 0, start ) + url.substring( end + 1 );
+        }
+        while( url.contains( "{" ) )
+        {
+            int start = url.indexOf( "{" );
             int end = url.indexOf( "}", start );
             url = url.substring( 0, start ) + url.substring( end + 1 );
         }

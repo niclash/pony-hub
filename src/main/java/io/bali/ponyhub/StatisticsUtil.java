@@ -14,6 +14,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -21,6 +23,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 public class StatisticsUtil
 {
     private static final ScheduledExecutorService executor;
+    private static final Pattern semVerPattern = Pattern.compile( "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$" );
 
     private static long githubMaxLimit;
 
@@ -33,6 +36,7 @@ public class StatisticsUtil
 
     public static void reportGithubRepository( ProjectVersion version )
     {
+        boolean newer = true;
         for( ProjectVersion v : recentUpdates )
         {
             if( v.repository().host().identity().equals( version.repository().host().identity() )
@@ -40,15 +44,74 @@ public class StatisticsUtil
                 && v.name().equals( version.name() )
             )
             {
-                recentUpdates.remove( v );
+                if( isNewerVersion( version.version(), v.version() ) )
+                {
+                    recentUpdates.remove( v );
+                }
+                else
+                {
+                    newer = false;
+                }
                 break;
             }
         }
-        int ch = version.version().charAt( 0 );
-        if( ( ch >= '0' && ch <= '9' ) || ( ch == 'v' && version.version().matches( "[a-zA-Z]*[0-9.]*.*" ) ) )
+        if( newer && semVerPattern.matcher( version.version() ).matches() )
         {
             recentUpdates.add( version );
         }
+    }
+
+    private static boolean isNewerVersion( String thisVersion, String previousVersion )
+    {
+        try
+        {
+            Matcher thisMatcher = semVerPattern.matcher( thisVersion );
+            if( !thisMatcher.matches() )
+            {
+                return false;
+            }
+            int thisMajor = Integer.parseInt( thisMatcher.group( 1 ) );
+            int thisMinor = Integer.parseInt( thisMatcher.group( 2 ) );
+            int thisPatch = Integer.parseInt( thisMatcher.group( 3 ) );
+            Matcher previousMatcher = semVerPattern.matcher( previousVersion );
+            if( !previousMatcher.matches() )
+            {
+                // Should never happen...
+                return false;
+            }
+            int prevMajor = Integer.parseInt( previousMatcher.group( 1 ) );
+            int prevMinor = Integer.parseInt( previousMatcher.group( 2 ) );
+            int prevPatch = Integer.parseInt( previousMatcher.group( 3 ) );
+            if( prevMajor > thisMajor )
+            {
+                return false;
+            }
+            if( prevMajor < thisMajor )
+            {
+                return true;
+            }
+            if( prevMinor > thisMinor )
+            {
+                return false;
+            }
+            if( prevMinor < thisMinor )
+            {
+                return true;
+            }
+            if( prevPatch > thisPatch )
+            {
+                return false;
+            }
+            if( prevPatch < thisPatch )
+            {
+                return true;
+            }
+        }
+        catch( Exception e )
+        {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     public static void reportGithubAccess( String maxLimit, String remainingLimit, String resetLimit )

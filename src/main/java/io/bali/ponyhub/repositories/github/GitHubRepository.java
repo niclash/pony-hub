@@ -7,7 +7,7 @@ import io.bali.ponyhub.repositories.RepositoryHost;
 import io.bali.ponyhub.repositories.RepositoryIdentity;
 import java.time.ZonedDateTime;
 
-@JsonIgnoreProperties
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class GitHubRepository
     implements Repository
 {
