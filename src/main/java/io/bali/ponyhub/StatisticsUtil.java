@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -33,6 +34,19 @@ public class StatisticsUtil
 
     public static void reportGithubRepository( ProjectVersion version )
     {
+        Iterator<ProjectVersion> iterator = recentUpdates.iterator();
+        while( iterator.hasNext() )
+        {
+            ProjectVersion v = iterator.next();
+            if( v.repository().host().identity().equals( version.repository().host().identity() )
+                && v.organization().equals( version.organization() )
+                && v.name().equals( version.name() )
+            )
+            {
+                iterator.remove();
+                break;
+            }
+        }
         recentUpdates.add( version );
     }
 
@@ -116,8 +130,8 @@ public class StatisticsUtil
     {
         try
         {
-            Path p = Paths.get("/var/log/ponyhub/audit.log");
-            Files.writeString( p, locator + "\n", StandardCharsets.UTF_8, APPEND, CREATE);
+            Path p = Paths.get( "/var/log/ponyhub/audit.log" );
+            Files.writeString( p, locator + "\n", StandardCharsets.UTF_8, APPEND, CREATE );
         }
         catch( IOException e )
         {
@@ -125,8 +139,8 @@ public class StatisticsUtil
             {
                 Path directory = Files.createTempDirectory( "ponyhub" );
                 Path p = directory.resolve( "audit.log" );
-                System.out.println(p);
-                Files.writeString( p, locator + "\n", StandardCharsets.UTF_8, APPEND, CREATE);
+                System.out.println( p );
+                Files.writeString( p, locator + "\n", StandardCharsets.UTF_8, APPEND, CREATE );
             }
             catch( IOException ioException )
             {
