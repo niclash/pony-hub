@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -41,11 +40,15 @@ public class StatisticsUtil
                 && v.name().equals( version.name() )
             )
             {
-                recentUpdates.remove(v);
+                recentUpdates.remove( v );
                 break;
             }
         }
-        recentUpdates.add( version );
+        int ch = version.version().charAt( 0 );
+        if( ( ch >= '0' && ch <= '9' ) || ( ch == 'v' && version.version().matches( "[a-zA-Z]*[0-9.]*.*" ) ) )
+        {
+            recentUpdates.add( version );
+        }
     }
 
     public static void reportGithubAccess( String maxLimit, String remainingLimit, String resetLimit )
