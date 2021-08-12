@@ -34,16 +34,14 @@ public class StatisticsUtil
 
     public static void reportGithubRepository( ProjectVersion version )
     {
-        Iterator<ProjectVersion> iterator = recentUpdates.iterator();
-        while( iterator.hasNext() )
+        for( ProjectVersion v : recentUpdates )
         {
-            ProjectVersion v = iterator.next();
             if( v.repository().host().identity().equals( version.repository().host().identity() )
                 && v.organization().equals( version.organization() )
                 && v.name().equals( version.name() )
             )
             {
-                iterator.remove();
+                recentUpdates.remove(v);
                 break;
             }
         }
