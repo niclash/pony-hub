@@ -47,8 +47,7 @@ public class StatisticsUtil
                 if( isNewerVersion( version.version(), v.version() ) )
                 {
                     recentUpdates.remove( v );
-                }
-                else
+                } else
                 {
                     newer = false;
                 }
@@ -65,6 +64,18 @@ public class StatisticsUtil
     {
         try
         {
+            if( previousVersion.equals( "main" ) )
+            {
+                return true;
+            }
+            if( previousVersion.equals( "master" ) )
+            {
+                return true;
+            }
+            if( previousVersion.equals( "develop" ) )
+            {
+                return true;
+            }
             Matcher thisMatcher = semVerPattern.matcher( thisVersion );
             if( !thisMatcher.matches() )
             {
